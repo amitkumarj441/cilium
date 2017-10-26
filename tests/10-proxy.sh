@@ -33,6 +33,12 @@ SVC_IP4="2.2.2.2"
 cleanup
 logs_clear
 
+function no_service_init {
+  cilium service delete --all
+  SERVER_IP=$SERVER1_IP;
+  SERVER_IP4=$SERVER1_IP4;
+}
+
 function service_init {
   log "beginning service init"
   cilium service update --rev --frontend "$SVC_IP4:80" --id 2233 \
@@ -284,14 +290,22 @@ function proxy_test {
   log "finished proxy test"
 }
 
-for service in "none" "lb"; do
-  for policy in "egress" "ingress" "egress_and_ingress" "many_egress" "many_ingress"; do
-    for state in "false" "true"; do
+proxy_init
+for state in "false" "true"; do
+  cilium config ConntrackLocal=$state
+
+  for service in "none" "lb"; do
+    case $service in
+      "none")
+        no_service_init;;
+      "lb")
+        service_init;;
+    esac
+
+    for policy in "egress" "ingress" "egress_and_ingress" "many_egress" "many_ingress"; do
       log "+----------------------------------------------------------------------+"
-      log "Testing with Policy=$policy, Conntrack=$state, Service=$service"
-      cilium config ConntrackLocal=$state
-      wait_for_cilium_ep_gen
-      proxy_init
+      log "Testing with Policy=$policy, Service=$service, Conntrack=$state"
+      log "+----------------------------------------------------------------------+"
 
       case $policy in
         "many_egress")
@@ -306,26 +320,18 @@ for service in "none" "lb"; do
           policy_egress_and_ingress;;
       esac
 
-
-      case $service in
-        "none")
-          ;;
-        "lb")
-          service_init;;
-      esac
-
       wait_for_cilium_ep_gen
-      cilium endpoint list
+
       proxy_test
-      log "deleting all services from Cilium"
-      cilium service delete --all
-      log "deleting all policies from Cilium"
-      cilium policy delete --all 2> /dev/null || true
-      log "removing containers"
-      docker rm -f server1 server2 client 2> /dev/null || true
-      wait_for_cilium_ep_gen
     done
   done
 done
+
+log "deleting all services from Cilium"
+cilium service delete --all
+log "deleting all policies from Cilium"
+cilium policy delete --all 2> /dev/null || true
+log "removing containers"
+docker rm -f server1 server2 client 2> /dev/null || true
 
 test_succeeded "${TEST_NAME}"
