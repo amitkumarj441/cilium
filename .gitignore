@@ -43,3 +43,7 @@ outgoing
 *cscope.in.out
 *cscope.po.out
 *tags
+
+bazel-*
+envoy-api/test
+pkg/envoy/api
