@@ -258,9 +258,9 @@ func (e *Endpoint) regenerateConsumable(owner Owner) (bool, error) {
 	}
 
 	repo := owner.GetPolicyRepository()
-	repo.Mutex.Lock()
+	repo.Mutex.RLock()
 	newL4policy, err := repo.ResolveL4Policy(&ctx)
-	defer repo.Mutex.Unlock()
+	defer repo.Mutex.RUnlock()
 
 	if err != nil {
 		return false, err
@@ -334,7 +334,7 @@ func (e *Endpoint) regenerateL3Policy(owner Owner) (bool, error) {
 	c := e.Consumable
 
 	repo := owner.GetPolicyRepository()
-	repo.Mutex.Lock() // Must be taken before c.Mutex
+	repo.Mutex.RLock() // Must be taken before c.Mutex
 	c.Mutex.RLock()
 	ctx := policy.SearchContext{
 		To:    c.LabelArray, // keep c.Mutex taken to protect this.
@@ -344,7 +344,7 @@ func (e *Endpoint) regenerateL3Policy(owner Owner) (bool, error) {
 		ctx.Trace = policy.TRACE_ENABLED
 	}
 	newL3policy := repo.ResolveL3Policy(&ctx)
-	repo.Mutex.Unlock()
+	repo.Mutex.RUnlock()
 	c.Mutex.RUnlock()
 
 	e.L3Policy = newL3policy
@@ -586,8 +586,8 @@ func (e *Endpoint) SetIdentity(owner Owner, id *policy.Identity) {
 	repo := owner.GetPolicyRepository()
 	cache := policy.GetConsumableCache()
 
-	repo.Mutex.Lock()
-	defer repo.Mutex.Unlock()
+	repo.Mutex.RLock()
+	defer repo.Mutex.RUnlock()
 
 	if e.Consumable != nil {
 		if e.SecLabel != nil && id.ID == e.Consumable.ID {
