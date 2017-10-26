@@ -1,0 +1,9 @@
+[submodule "envoy/envoy"]
+	path = envoy/envoy
+	url = https://github.com/jrajahalme/envoy.git
+[submodule "envoy/envoy-api"]
+	path = envoy-api/envoy-api
+	url = https://github.com/jrajahalme/envoy-api.git
+[submodule "envoy-api/google"]
+	path = envoy-api/google
+	url = https://github.com/googleapis/googleapis.git

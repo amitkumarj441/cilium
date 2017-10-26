@@ -94,6 +94,7 @@ var (
 	k8sAPIServer          string
 	k8sKubeConfigPath     string
 	dockerEndpoint        string
+	useEnvoy              bool
 )
 
 var logOpts = make(map[string]string)
@@ -291,6 +292,8 @@ func init() {
 	flags.String("enable-policy", endpoint.DefaultEnforcement, "Enable policy enforcement")
 	flags.BoolVar(&enableTracing,
 		"enable-tracing", false, "Enable tracing while determining policy (debugging)")
+	flags.BoolVar(&useEnvoy,
+		"envoy-proxy", false, "Use Envoy for HTTP proxy")
 	flags.StringVar(&v4Prefix,
 		"ipv4-range", AutoCIDR, "Per-node IPv4 endpoint prefix, e.g. 10.16.0.0/16")
 	flags.StringVar(&v6Prefix,

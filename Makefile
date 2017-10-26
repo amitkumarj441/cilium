@@ -1,6 +1,6 @@
 include Makefile.defs
 
-SUBDIRS = plugins bpf cilium daemon monitor
+SUBDIRS = envoy envoy-api plugins bpf cilium daemon monitor
 GODIRS = api cilium common daemon monitor pkg plugins
 GOFILES = $(shell git ls-tree --name-only -r HEAD $(GODIRS) | grep .go$$)
 GOPKGS = $(shell go list $(patsubst %,./%/...,$(GODIRS)) | grep -v envoy/api)
@@ -17,7 +17,7 @@ build: $(SUBDIRS)
 $(SUBDIRS): force
 	@ $(MAKE) -C $@ all
 
-tests: tests-common tests-consul
+tests: tests-common tests-consul tests-envoy
 
 tests-ginkgo: tests-common-ginkgo
 
@@ -32,6 +32,9 @@ tests-common-ginkgo: force
 
 tests-common: precheck-gofmt force
 	go vet $(GOPKGS)
+
+tests-envoy:
+	@ $(MAKE) -C envoy tests
 
 tests-etcd:
 	@docker rm -f "cilium-etcd-test-container" 2> /dev/null || true
