@@ -2,13 +2,11 @@
 
 set -ex
 
-diff="$(find . ! \( -path './contrib' -prune \) \
-        ! \( -path './vendor' -prune \) \
-        ! \( -path './.git' -prune \) \
-        ! \( -path './envoy-api/google' -prune \) \
-        ! -samefile ./daemon/bindata.go \
-        -type f -name '*.go' -print0 \
-                | xargs -0 gofmt -d -l -s )"
+if [ $# -eq 0 ]; then
+	exit 0
+fi
+
+diff=`gofmt -d -l -s "$@"`
 
 if [ -n "$diff" ]; then
 	echo "Unformatted Go source code:"

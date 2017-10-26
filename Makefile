@@ -1,7 +1,9 @@
 include Makefile.defs
 
 SUBDIRS = plugins bpf cilium daemon monitor
-GOFILES ?= $(shell go list ./... | grep -v /vendor/ | grep -v /contrib/ | grep -v /test)
+GODIRS = api cilium common daemon monitor pkg plugins
+GOFILES = $(shell git ls-tree --name-only -r HEAD $(GODIRS) | grep .go$$)
+GOPKGS = $(shell go list $(patsubst %,./%/...,$(GODIRS)) | grep -v envoy/api)
 GOLANGVERSION = $(shell go version 2>/dev/null | grep -Eo '(go[0-9].[0-9])')
 GOLANG_SRCFILES=$(shell for pkg in $GOFILES; do find $(pkg) -name *.go -print; done | grep -v /vendor/)
 BPF_SRCFILES=$(shell find bpf/ -name *.[ch] -print)
@@ -28,9 +30,8 @@ tests-common-ginkgo: force
 	docker-compose -f test/docker-compose.yml -p $$JOB_BASE_NAME-$$BUILD_NUMBER down
 	go vet $(GOFILES)
 
-tests-common: force
-	tests/00-fmt.sh
-	go vet $(GOFILES)
+tests-common: precheck-gofmt force
+	go vet $(GOPKGS)
 
 tests-etcd:
 	@docker rm -f "cilium-etcd-test-container" 2> /dev/null || true
@@ -45,7 +46,7 @@ tests-etcd:
         -initial-cluster-state new
 	echo "mode: count" > coverage-all.out
 	echo "mode: count" > coverage.out
-	$(foreach pkg,$(GOFILES),\
+	$(foreach pkg,$(GOPKGS),\
 	go test \
             -ldflags "-X "github.com/cilium/cilium/pkg/kvstore".backend=etcd" \
             -timeout 30s -coverprofile=coverage.out -covermode=count $(pkg) $(GOTEST_OPTS) || exit 1;\
@@ -80,7 +81,7 @@ tests-consul:
            agent -client=0.0.0.0 -server -bootstrap-expect 1
 	echo "mode: count" > coverage-all.out
 	echo "mode: count" > coverage.out
-	$(foreach pkg,$(GOFILES),\
+	$(foreach pkg,$(GOPKGS),\
 	go test \
             -ldflags "-X "github.com/cilium/cilium/pkg/kvstore".backend=consul" \
             -timeout 30s -coverprofile=coverage.out -covermode=count $(pkg) $(GOTEST_OPTS) || exit 1;\
@@ -168,10 +169,10 @@ release:
 	git archive --format tar $(BRANCH) | gzip > ../cilium_$(VERSION).orig.tar.gz
 
 gofmt:
-	for pkg in $(GOFILES); do go fmt $$pkg; done
+	gofmt -l -w $(GOFILES)
 
 precheck-gofmt:
-	tests/00-fmt.sh
+	tests/00-fmt.sh $(GOFILES)
 
 pprof-help:
 	@echo "Available pprof targets:"
