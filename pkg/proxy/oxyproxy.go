@@ -354,7 +354,7 @@ func createOxyRedirect(l4 *policy.L4Filter, id string, source ProxySource, to ui
 
 	redirect := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		record := &accesslog.LogRecord{
-			Request:           req,
+			HttpRequest:       req,
 			Timestamp:         time.Now().UTC().Format(time.RFC3339Nano),
 			NodeAddressInfo:   redir.nodeInfo,
 			TransportProtocol: 6, // TCP's IANA-assigned protocol number
@@ -372,7 +372,8 @@ func createOxyRedirect(l4 *policy.L4Filter, id string, source ProxySource, to ui
 			log.Errorf("%s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			record.Info = fmt.Sprintf("cannot generate url: %s", err)
-			accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictError, http.StatusBadRequest)
+			accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictError,
+				http.StatusBadRequest, accesslog.L7TypeHTTP)
 			return
 		}
 
@@ -393,7 +394,8 @@ func createOxyRedirect(l4 *policy.L4Filter, id string, source ProxySource, to ui
 			if rule == nil {
 				http.Error(w, "Access denied", http.StatusForbidden)
 				redir.mutex.Unlock()
-				accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictDenied, http.StatusForbidden)
+				accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictDenied,
+					http.StatusForbidden, accesslog.L7TypeHTTP)
 				return
 			}
 			ar := rule.(string)
@@ -408,7 +410,8 @@ func createOxyRedirect(l4 *policy.L4Filter, id string, source ProxySource, to ui
 		req.URL = generateURL(req, dstIPPort)
 
 		// log valid request
-		accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictForwarded, http.StatusOK)
+		accesslog.Log(record, accesslog.TypeRequest, accesslog.VerdictForwarded,
+			http.StatusOK, accesslog.L7TypeHTTP)
 
 		ctx := req.Context()
 		if ctx != nil {
@@ -420,7 +423,8 @@ func createOxyRedirect(l4 *policy.L4Filter, id string, source ProxySource, to ui
 
 		// log valid response
 		record.Timestamp = time.Now().UTC().Format(time.RFC3339Nano)
-		accesslog.Log(record, accesslog.TypeResponse, accesslog.VerdictForwarded, http.StatusOK)
+		accesslog.Log(record, accesslog.TypeResponse, accesslog.VerdictForwarded,
+			http.StatusOK, accesslog.L7TypeHTTP)
 	})
 
 	redir.server = manners.NewWithServer(&http.Server{
