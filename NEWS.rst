@@ -2,10 +2,39 @@
 NEWS
 ******
 
+Version 0.13
+============
+
+:date: 1970-01-01
+:commit: nil
+
+Bug Fixes
+---------
+
+Features
+--------
+* Improved ``cilium policy trace`` output (1810_)
+* Add ``cilium cilium bpf ct flush`` command (1788_)
+
+Kubernetes
+----------
+
+Documentation
+-------------
+
+CI
+--
+* Improved CI testing infrastructure and fixed several test flakes (1848_, 1865_)
+* Foundation of new Ginkgo build-driven-development framework for CI (1733_)
+
+Other
+-----
+* Standardized structured logging (1801_, 1828_, 1836_, 1826_, 1833_, 1834_, 1827_, 1829_, 1832_, 1835_)
+
 Version 0.12
 ============
 
-:date: 2017-10-10
+:date: 2017-10-26
 :commit: nil
 
 Bug Fixes
@@ -47,11 +76,16 @@ Bug Fixes
   guide (1642_)
 * Fix to guarantee to always handle events for a particular container in order
   (1677_)
+* Fix endpoint build deadlock (1777_)
+* containerd watcher resyncs on missed events better (1691_)
+* Free up allocated memory for state on poll false positives (1821_)
+* Fix deadlock when running ``cilium endpoint list -l <label>`` (1858_)
+* Fall back to host networking on overlay non-match (1847_)
 
 Features
 --------
 
-* Initial code to start supporting Kafka policy enforcement (1634_)
+* Initial code to start supporting Kafka policy enforcement (1634_, 1757_)
 * New ``json`` and ``jsonpath`` output modes for the cilium CLI command.
   (1484_)
 * New simplified policy model to express connectivity to special entities
@@ -97,6 +131,8 @@ Kubernetes
 * Improved logic involved to Kubernetes node annotations with IPv6 pod CIDR
   (1563_)
 * Refactor pod annotation logic (1468_)
+* Give preference to Kubernetes IP allocation (1767_)
+* Re-wrote CRD client to fix "no kind Status" warning (1817_)
 
 Documentation
 -------------
@@ -109,11 +145,15 @@ Documentation
 * Added instructions on how to configure MTU and other parameters in
   combination with CNI (1612_)
 * API stability guarantees (1628_)
+* Make GitHub URLs depend on the current branch (1764_)
+* Document assurances if Cilium or its dependencies get into a bad state (1713_)
+* Bump supported minikube version (1816_)
+* Update policy examples (1837_)
 
 CI
 __
 * Improved CI testing infrastructure and fixed several test flakes (1632_,
-  1624_, 1455_, 1441_, 1435_, 1542_)
+  1624_, 1455_, 1441_, 1435_, 1542_, 1776_)
 * New builtin deadlock detection for developers. Enable this in Makefile.defs. (1648_)
 
 Other
@@ -124,6 +164,7 @@ Other
 * go-openapi, go-swagger (0.12.0), 
 * Update Sirupsen/logrus to sirupsen/logrus (1573_)
 * Fixed several BPF lint warnings (1666_)
+* Silence errors in 'clean-tags' Make target (1793_)
 
 Version 0.11
 =============
@@ -732,3 +773,32 @@ Fixes
 .. _1535: https://github.com/cilium/cilium/pull/1535
 .. _1573: https://github.com/cilium/cilium/pull/1573
 .. _1666: https://github.com/cilium/cilium/pull/1666
+.. _1777: https://github.com/cilium/cilium/pull/1777
+.. _1691: https://github.com/cilium/cilium/pull/1691
+.. _1821: https://github.com/cilium/cilium/pull/1821
+.. _1858: https://github.com/cilium/cilium/pull/1858
+.. _1847: https://github.com/cilium/cilium/pull/1847
+.. _1757: https://github.com/cilium/cilium/pull/1757
+.. _1767: https://github.com/cilium/cilium/pull/1767
+.. _1817: https://github.com/cilium/cilium/pull/1817
+.. _1764: https://github.com/cilium/cilium/pull/1764
+.. _1713: https://github.com/cilium/cilium/pull/1713
+.. _1816: https://github.com/cilium/cilium/pull/1816
+.. _1837: https://github.com/cilium/cilium/pull/1837
+.. _1776: https://github.com/cilium/cilium/pull/1776
+.. _1793: https://github.com/cilium/cilium/pull/1793
+.. _1810: https://github.com/cilium/cilium/pull/1810
+.. _1788: https://github.com/cilium/cilium/pull/1788
+.. _1848: https://github.com/cilium/cilium/pull/1848
+.. _1865: https://github.com/cilium/cilium/pull/1865
+.. _1733: https://github.com/cilium/cilium/pull/1733
+.. _1801: https://github.com/cilium/cilium/pull/1801
+.. _1828: https://github.com/cilium/cilium/pull/1828
+.. _1836: https://github.com/cilium/cilium/pull/1836
+.. _1826: https://github.com/cilium/cilium/pull/1826
+.. _1833: https://github.com/cilium/cilium/pull/1833
+.. _1834: https://github.com/cilium/cilium/pull/1834
+.. _1827: https://github.com/cilium/cilium/pull/1827
+.. _1829: https://github.com/cilium/cilium/pull/1829
+.. _1832: https://github.com/cilium/cilium/pull/1832
+.. _1835: https://github.com/cilium/cilium/pull/1835
